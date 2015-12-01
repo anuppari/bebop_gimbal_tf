@@ -6,8 +6,9 @@ project(bebop_gimbal_tf)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  std_msgs
   tf
+  geometry_msgs
+  bebop_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -65,10 +66,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -128,16 +129,16 @@ include_directories(
 # add_dependencies(bebop_gimbal_tf ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(bebop_gimbal_tf_node src/bebop_gimbal_tf_node.cpp)
+add_executable(bebop_gimbal_tf_node src/bebop_gimbal_tf_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(bebop_gimbal_tf_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(bebop_gimbal_tf_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(bebop_gimbal_tf_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(bebop_gimbal_tf_node
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
