@@ -45,7 +45,7 @@ public:
 		tfScalar roll, pitch, yaw;
 		transform.getBasis().getEulerYPR(yaw, pitch, roll);
 		
-		// Adjust transform to compensate for gimbal
+		// Adjust transform to compensate for gimbal, i.e., undoing roll and pitch, add back in pan and tilt
 		tf::Matrix3x3 rollMat;
 		rollMat.setEulerYPR(0,0,-roll);
 		tf::Matrix3x3 pitchMat;
@@ -53,8 +53,9 @@ public:
 		tf::Matrix3x3 panTiltMat;
 		panTiltMat.setEulerYPR(pan_,tilt_,0);
 		
-		tf::Transform newTransform = staticTransform_*tf::Transform(rollMat,tf::Vector3(0,0,0))*tf::Transform(pitchMat,tf::Vector3(0,0,0));
-		newTransform *= tf::Transform(panTiltMat,tf::Vector3(0,0,0));
+		tf::Transform newTransform = staticTransform_; // start with nominal/flat trim transform
+		newTransform *= tf::Transform(rollMat,tf::Vector3(0,0,0))*tf::Transform(pitchMat,tf::Vector3(0,0,0)); // undo roll and pitch
+		newTransform *= tf::Transform(panTiltMat,tf::Vector3(0,0,0)); // compensate for pan tilt setting
 		
 		// Publish transform
 		br_.sendTransform(tf::StampedTransform(newTransform, msg->header.stamp, bebopName_, bebopImageName_));

@@ -1,0 +1,8 @@
+<launch>
+  <!-- node arg is the static transform between the bebop rigid body and image -->
+  <!-- args="x y z qx qy qz qw" -->
+  <node name="bebop_gimbal_tf_node" pkg="bebop_gimbal_tf" type="bebop_gimbal_tf_node" output="screen" args="0 0 0 0 0 0 1">
+    <param name="bebop_mocap_name" value="bebop" /> <!-- tf frame_id of bebop mocap rigid body -->
+    <param name="bebop_image_name" value="bebop_image" /> <!-- tf frame_id of bebop image -->
+  </node>
+</launch>
