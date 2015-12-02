@@ -15,8 +15,8 @@ private:
 	ros::Subscriber mocapSub_;
 	std::string bebopName_;
 	std::string bebopImageName_;
-	int pan_; // yaw
-	int tilt_; // pitch
+	tfScalar pan_; // yaw, in radians
+	tfScalar tilt_; // pitch, in radians
 
 public:
 	bebop_gimbal_tf(tf::Transform staticTransform): pan_(0), tilt_(0), staticTransform_(staticTransform)
@@ -38,8 +38,10 @@ public:
 		tf::Transform transform(tf::Quaternion(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w),
 								tf::Vector3(0,0,0));
 		
-		// Transform of camera w.r.t. world, i.e., P_world = transform*P_camera
-		transform *= staticTransform_;
+		// Transform of camera w.r.t. world, i.e., P_world = transform*P_camera.
+		// Additional matrix is to compensate for the fact that neutral camera has z out, x right, while neutral rpy has x out, y left
+		tf::Transform camImageTransform = tf::Transform(tf::Matrix3x3(0,-1,0, 0,0,-1, 1,0,0),tf::Vector3(0,0,0));
+		transform *= staticTransform_*camImageTransform;
 		
 		// Get roll, pitch, yaw of transform
 		tfScalar roll, pitch, yaw;
@@ -53,9 +55,9 @@ public:
 		tf::Matrix3x3 panTiltMat;
 		panTiltMat.setEulerYPR(pan_,tilt_,0);
 		
-		tf::Transform newTransform = staticTransform_; // start with nominal/flat trim transform
+		tf::Transform newTransform = staticTransform_*camImageTransform; // start with nominal/flat trim transform
 		newTransform *= tf::Transform(rollMat,tf::Vector3(0,0,0))*tf::Transform(pitchMat,tf::Vector3(0,0,0)); // undo roll and pitch
-		newTransform *= tf::Transform(panTiltMat,tf::Vector3(0,0,0)); // compensate for pan tilt setting
+		newTransform *= tf::Transform(panTiltMat,tf::Vector3(0,0,0))*camImageTransform.inverse(); // compensate for pan tilt setting and camera neutral
 		
 		// Publish transform
 		br_.sendTransform(tf::StampedTransform(newTransform, msg->header.stamp, bebopName_, bebopImageName_));
@@ -63,8 +65,8 @@ public:
 	
 	void camStateCB(const bebop_msgs::Ardrone3CameraStateOrientation::ConstPtr& msg)
 	{
-		pan_ = msg->pan;
-		tilt_ = msg->tilt;
+		pan_ = -1*msg->pan*M_PI/180.0;
+		tilt_ = -1*msg->tilt*M_PI/180.0;
 	}
 }; // end bebop_gimbal_tf
 
@@ -74,7 +76,7 @@ int main(int argc, char** argv)
     
     tf::Transform staticTransform;
     
-    if (argc == 11)
+    if (argc == 8)
     {
 		staticTransform = tf::Transform(tf::Quaternion(atof(argv[4]), atof(argv[5]), atof(argv[6]), atof(argv[7])),
 										tf::Vector3(atof(argv[1]), atof(argv[2]), atof(argv[3])));
