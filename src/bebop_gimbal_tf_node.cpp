@@ -54,13 +54,15 @@ public:
 		pitchMat.setEulerYPR(0,-pitch,0);
 		tf::Matrix3x3 panTiltMat;
 		panTiltMat.setEulerYPR(pan_,tilt_,0);
+		tf::Transform panTiltTransform(panTiltMat,tf::Vector3(0,0,0));
 		
 		tf::Transform newTransform = staticTransform_*camImageTransform; // start with nominal/flat trim transform
 		newTransform *= tf::Transform(rollMat,tf::Vector3(0,0,0))*tf::Transform(pitchMat,tf::Vector3(0,0,0)); // undo roll and pitch
-		newTransform *= tf::Transform(panTiltMat,tf::Vector3(0,0,0))*camImageTransform.inverse(); // compensate for pan tilt setting and camera neutral
+		newTransform *= panTiltTransform*camImageTransform.inverse(); // compensate for pan tilt setting and camera neutral
 		
 		// Publish transform
 		br_.sendTransform(tf::StampedTransform(newTransform, msg->header.stamp, bebopName_, bebopImageName_));
+		br_.sendTransform(tf::StampedTransform(staticTransform_*panTiltTransform, msg->header.stamp, bebopName_, bebopImageName_+"_static"));
 	}
 	
 	void camStateCB(const bebop_msgs::Ardrone3CameraStateOrientation::ConstPtr& msg)
