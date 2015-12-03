@@ -1,7 +1,7 @@
 <launch>
   <!-- node arg is the static transform between the bebop rigid body and image -->
   <!-- args="x y z qx qy qz qw" -->
-  <node name="bebop_gimbal_tf_node" pkg="bebop_gimbal_tf" type="bebop_gimbal_tf_node" output="screen" args="0.013662114819328 -0.002964485594444 -0.031471346895163 -0.485023210117676  0.49871222730066  -0.506152073414795  0.509708431608203">
+  <node name="bebop_gimbal_tf_node" pkg="bebop_gimbal_tf" type="bebop_gimbal_tf_node" output="screen" args="0.058177739210124  0.00142891329326  -0.062771768618194 -0.495369472847143  0.497613322762817 -0.502213421322346 0.504740167824542">
     <param name="bebop_mocap_name" value="bebop" /> <!-- tf frame_id of bebop mocap rigid body -->
     <param name="bebop_image_name" value="bebop_image" /> <!-- tf frame_id of bebop image -->
   </node>
